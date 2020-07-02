@@ -13,21 +13,46 @@ import { DetailsRow } from "office-ui-fabric-react/lib/DetailsList";
 import {
   Dropdown
 } from "office-ui-fabric-react/lib/Dropdown";
+import firebase, { database } from "firebase"
+import firebaseConfig from "./Firebase/firebase";
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      itemlist: [{camID:"Cam01",mscore:1,dscore:3,noti:"yes"},{camID:"Cam02",mscore:1,dscore:3,noti:"yes"},{camID:"Cam03",mscore:1,dscore:3,noti:"yes"}],
+      camlist: [{camID:"0",mscore:1,dscore:3,noti:"yes"}],
+      averages: [{mavg:0,davg:0}]
     };
 
   }
+async componentDidMount(){
+  firebase
+  .database(firebaseConfig)
+  .ref("Cameras")
+  .on("value", snapshot => {
+    this.setState({
+      camlist:[],
+      averages:[] //fix this sloppy code later
+     });
+     let mtotal = 0;
+     let dtotal = 0;
+     let iter = 0;
+    snapshot.forEach((snap) => {
+      iter++;
+      let dbcam = {camID: snap.key, mscore: snap.val().mscore, dscore:snap.val().dscore};
+      mtotal += snap.val().mscore;
+      dtotal += snap.val().dscore; 
+      this.setState({
+        camlist:[...this.state.camlist, dbcam]
+       }); 
+    })
+    this.setState({
+      averages:[...this.state.averages, {mavg: mtotal/iter, davg: dtotal/iter}]
+    })
+  })
+}
+
   render() {
-
-    const {
-      itemlist
-    } = this.state;
-
     return (
       <div>
           <Card
@@ -40,7 +65,7 @@ class Home extends Component {
               marginTop: "2rem",
             }}
           >
-            Welcome to DistanceMonitor
+            DistanceMonitor
           </Card>
         &nbsp;
           <div>
@@ -78,7 +103,7 @@ class Home extends Component {
               <MarqueeSelection>
                 <DetailsList
                   onRenderRow={this._onRenderRow}
-                  items={itemlist}
+                  items={this.state.camlist}
                   columns={[
                     {
                         key: "column1",
@@ -119,6 +144,45 @@ class Home extends Component {
                   enableUpdateAnimations
                 />
               </MarqueeSelection>
+            </Card>
+
+          <div>
+            <br />
+          </div>
+
+            <Card tokens={{ width: "75%", maxWidth: 1600, childrenGap: 5 }}
+              style={{
+                margin: "0 auto",
+                padding: "1rem",
+                backgroundColor: "white",
+              }}>
+            <Stack horizontalAlign="left"><b>Average Values</b></Stack>
+            <DetailsList
+                  onRenderRow={this._onRenderRow}
+                  items={this.state.averages}
+                  columns={[
+                    {
+                        key: "column1",
+                        name: "Mask Average",
+                        fieldName: "mavg",
+                        minWidth: 50,
+                        maxWidth: 100,
+                        isResizable: true,
+                    },
+                    {
+                        key: "column2",
+                        name: "Distancing Average",
+                        fieldName: "davg",
+                        minWidth: 50,
+                        maxWidth: 100,
+                        isResizable: true,
+                    },
+                  ]}
+                  styles={{ root: { height: "100%" } }}
+                  selectionPreservedOnEmptyClick={true}
+                  layoutMode={DetailsListLayoutMode.justified}
+                  enableUpdateAnimations
+                />
             </Card>
           </Fabric>
       </div>
