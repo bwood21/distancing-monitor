@@ -55,6 +55,7 @@ async componentDidMount(){
   render() {
     return (
       <div>
+              <a href="/local">LocalMonitor</a>
           <Card
             className="nav"
             tokens={{ width: "60%", maxWidth: 1600, childrenGap: 5 }}
