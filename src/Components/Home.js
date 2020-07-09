@@ -20,8 +20,9 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      camlist: [{camID:"0",mscore:1,dscore:3,noti:"yes"}],
-      averages: [{mavg:0,davg:0}]
+      camlist: [{camID:"0",mscore:1,dscore:3,noti:"yes"}], //sample formatting, erased on load
+      averages: [{mavg:0,davg:0}],
+      options: [{key:"test", text:"test2"}]
     };
 
   }
@@ -32,7 +33,8 @@ async componentDidMount(){
   .on("value", snapshot => {
     this.setState({
       camlist:[],
-      averages:[] //fix this sloppy code later
+      averages:[], //fix this sloppy code later
+      options: []
      });
      let mtotal = 0;
      let dtotal = 0;
@@ -40,10 +42,12 @@ async componentDidMount(){
     snapshot.forEach((snap) => {
       iter++;
       let dbcam = {camID: snap.key, mscore: snap.val().mscore, dscore:snap.val().dscore};
+      let options = {key: snap.key, text: snap.key};
       mtotal += snap.val().mscore;
       dtotal += snap.val().dscore; 
       this.setState({
-        camlist:[...this.state.camlist, dbcam]
+        camlist:[...this.state.camlist, dbcam],
+        options:[...this.state.options, options]
        }); 
     })
     this.setState({
@@ -53,9 +57,9 @@ async componentDidMount(){
 }
 
   render() {
+    let {options} = this.state;
     return (
       <div>
-              <a href="/local">LocalMonitor</a>
           <Card
             className="nav"
             tokens={{ width: "60%", maxWidth: 1600, childrenGap: 5 }}
@@ -68,11 +72,11 @@ async componentDidMount(){
           >
             DistanceMonitor
           </Card>
-        &nbsp;
+          &nbsp;
           <div>
             <br />
           </div>
-        &nbsp;     
+        &nbsp;
           <Fabric>
             <Card
               tokens={{ width: "75%", maxWidth: 1600, childrenGap: 5 }}
@@ -89,16 +93,12 @@ async componentDidMount(){
                 horizontal
                 tokens={{ childrenGap: 10 }}
               >
-                <TextField
-                  placeholder="Test"
-                  styles={{ root: { width: 400 } }}
-                  id="ColName"
-                />
                 <Dropdown
-                  placeholder="Test"
+                  placeholder="Select Camera ID"
+                  options={options}
                 />
-                <PrimaryButton>
-                  SampleButton
+                <PrimaryButton href="/local">
+                  Open Local Monitor
                 </PrimaryButton>
               </Stack>
               <MarqueeSelection>
