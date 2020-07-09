@@ -1,0 +1,21 @@
+.background-green{
+    background-color: lightgreen;
+    height:923px;
+}
+.background-red{
+    background-color: lightcoral;
+    height:923px;
+}
+.background-yellow{
+    background-color: lightyellow;
+    height: 923px;
+}
+h1 {
+    color: black;
+    font-family: Chonburi, serif;
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+  }
