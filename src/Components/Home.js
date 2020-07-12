@@ -15,7 +15,9 @@ import {
 } from "office-ui-fabric-react/lib/Dropdown";
 import firebase, { database } from "firebase"
 import firebaseConfig from "./Firebase/firebase";
-
+import {Link} from 'react-router-dom'
+//TODO: Initialize icons, onRender of localdisplay flashing
+let localmonitorpath = "/local/";
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -24,7 +26,6 @@ class Home extends Component {
       averages: [{mavg:0,davg:0}],
       options: [{key:"test", text:"test2"}]
     };
-
   }
 async componentDidMount(){
   firebase
@@ -33,7 +34,7 @@ async componentDidMount(){
   .on("value", snapshot => {
     this.setState({
       camlist:[],
-      averages:[], //fix this sloppy code later
+      averages:[], //TODO: fix this sloppy code later
       options: []
      });
      let mtotal = 0;
@@ -96,10 +97,18 @@ async componentDidMount(){
                 <Dropdown
                   placeholder="Select Camera ID"
                   options={options}
+                  onChange={(e, selectedOption) => {
+                    localmonitorpath = "/local/" + selectedOption.key
+                    console.log(localmonitorpath)
+                  }}
                 />
-                <PrimaryButton href="/local">
+                <PrimaryButton onClick={(e) => { //Must use onClick instead of href because href only runs once on initialization
+                  e.preventDefault()
+                  window.location.href=localmonitorpath
+                }}>
                   Open Local Monitor
                 </PrimaryButton>
+
               </Stack>
               <MarqueeSelection>
                 <DetailsList

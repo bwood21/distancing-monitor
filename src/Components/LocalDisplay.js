@@ -12,7 +12,7 @@ class LocalDisplay extends Component {
     super(props);
     this.state = {issocialdistancing : true,
                   iswearingmask : true,
-                  camID : 1};
+                  camID : this.props.match.params.cid};
   }
   
   async componentDidMount(){
