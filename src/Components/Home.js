@@ -30,7 +30,9 @@ class Home extends Component {
 async componentDidMount(){
   firebase
   .database(firebaseConfig)
-  .ref("Cameras")
+  .ref()
+  .orderByKey()
+  .limitToLast(1)
   .on("value", snapshot => {
     this.setState({
       camlist:[],
@@ -40,7 +42,8 @@ async componentDidMount(){
      let mtotal = 0;
      let dtotal = 0;
      let iter = 0;
-    snapshot.forEach((snap) => {
+     let log = snapshot.child(snapshot.node_.children_.root_.key + "/Cameras") //this doesn't seem like the right way to do this but oh well
+    log.forEach((snap) => {
       iter++;
       let dbcam = {camID: snap.key, mscore: snap.val().mscore, dscore:snap.val().dscore};
       let options = {key: snap.key, text: snap.key};

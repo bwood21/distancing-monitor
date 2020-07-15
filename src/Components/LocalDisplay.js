@@ -26,14 +26,18 @@ class LocalDisplay extends Component {
     },1000);
     firebase
     .database(firebaseConfig)
-    .ref("Cameras/" + this.state.camID)
+    .ref()
+    .orderByKey()
+    .limitToLast(1)
+    //.ref("Cameras/" + this.state.camID)
     .on("value", snapshot => {
-          if(snapshot.val().mscore > 5){
+          let log = snapshot.child(snapshot.node_.children_.root_.key + "/Cameras/" + this.state.camID)
+          if(log.val().mscore > 5){
             this.setState({iswearingmask : false})
           }else{
             this.setState({iswearingmask : true})
           }
-          if(snapshot.val().dscore > 5){
+          if(log.val().dscore > 5){
             this.setState({issocialdistancing : false})
           }else{
             this.setState({issocialdistancing : true})
