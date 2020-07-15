@@ -16,7 +16,7 @@ import {
 import firebase, { database } from "firebase"
 import firebaseConfig from "./Firebase/firebase";
 import {Link} from 'react-router-dom'
-//TODO: Initialize icons, onRender of localdisplay flashing
+//TODO: database Auth
 let localmonitorpath = "/local/";
 class Home extends Component {
   constructor(props) {

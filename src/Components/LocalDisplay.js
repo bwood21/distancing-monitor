@@ -12,10 +12,18 @@ class LocalDisplay extends Component {
     super(props);
     this.state = {issocialdistancing : true,
                   iswearingmask : true,
-                  camID : this.props.match.params.cid};
+                  camID : this.props.match.params.cid,
+                  visible : true};
   }
   
   async componentDidMount(){
+    this.interval = setInterval(() => {
+      this.setState((state, props) => {
+        return {
+          visible : !state.visible,
+        };
+      });
+    },1000);
     firebase
     .database(firebaseConfig)
     .ref("Cameras/" + this.state.camID)
@@ -33,14 +41,18 @@ class LocalDisplay extends Component {
     })
   }
 
+  componentWillUnmount = () => {
+    clearInterval(this.interval);
+  }
+
   render() {
-    const {issocialdistancing, iswearingmask} = this.state;
+    const {issocialdistancing, iswearingmask, visible} = this.state;
     return (
       <div className={(issocialdistancing && iswearingmask) ? 'background-green' : ((!issocialdistancing && !iswearingmask) ? 'background-red' : 'background-yellow')}>
           <h1>Social Distancing : {issocialdistancing ? 'Good' : 'Bad'} </h1>
           <h1>Mask Wearing : {iswearingmask ? 'Good' : 'Bad'} </h1>
-          <img classname={Image} src={issocialdistancing ? distancing_green : distancing_red} alt="distancing"></img>
-          <img src={iswearingmask ? mask_green : mask_red} alt="distancing"></img>
+          <img className={`icons${(visible && !issocialdistancing) ? " transition" : ""}`} src={issocialdistancing ? distancing_green : distancing_red} alt="distancing"></img>
+          <img className={`icons${(visible && !iswearingmask) ? " transition" : ""}`} src={iswearingmask ? mask_green : mask_red} alt="distancing"></img>
       </div>
     );
   }

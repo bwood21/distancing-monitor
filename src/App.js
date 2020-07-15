@@ -3,8 +3,10 @@ import './App.css';
 import Home from './Components/Home.js'
 import { Route, BrowserRouter, Redirect, Switch } from 'react-router-dom'
 import LocalDisplay from './Components/LocalDisplay.js'
+import { initializeIcons } from '@uifabric/icons'
 
 function App() {
+  initializeIcons();
   return (
     <div className="App">
       <BrowserRouter>
