@@ -268,11 +268,11 @@ async componentDidMount(){
                                         </td>
 
                                         <td>
-                                          <Checkbox label = "Yellow - Moderate Risk" divAssoc = "FFFF00" onChange = {_mapChange} />
+                                          <Checkbox label = "Yellow - Moderate Risk" divAssoc = "FFFF00" onChange = {this._mapChange} />
                                         </td>
 
                                         <td>
-                                          <Checkbox label = "Green - Miniscule Risk" divAssoc = "00FF00" onChange = {_mapChange} /> 
+                                          <Checkbox label = "Green - Miniscule Risk" divAssoc = "00FF00" onChange = {this._mapChange} /> 
                                         </td>
                                       </tr>
                                     </tbody>
