@@ -4,9 +4,135 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale;;
+  background-color: #faf9f8;
 }
 
-html, body {
-  background-color: #faf9f8 ;
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+svg:hover .red
+{
+  fill: #FF0000; 
+}
+
+svg:hover .yellow
+{
+  fill: #FFFF00; 
+}
+
+svg:hover .green
+{
+  fill: #00FF00; 
+}
+
+h1
+{
+  color: white;
+  text-align: center;
+}
+
+#terminal
+{
+  top: 1%;
+  /* margin-top: 2.5%; */ 
+  padding: 0px; 
+  position:relative;
+  transition: transform 150 ms ease-in-out;
+  display: inline-block;
+
+}
+
+.base_wrap
+{
+  position:relative;
+  transition: transform 150 ms ease-in-out;
+  display: inline-block;
+}
+
+.base_wrap svg
+{
+  position: absolute;
+  margin-left: 4.8%;
+  margin-top: 0.7%; 
+  left: 0px;
+  z-index: 2;
+  width: 521px;
+  height: 665px;
+  
+}
+
+path
+{
+  fill-opacity: 65%;
+}
+
+.mainBox
+{
+  display: flex; 
+  flex-wrap: wrap;
+  flex-direction: column; 
+
+  display: -webkit-flex;
+  -webkit-flex-wrap: wrap;
+  -webkit-flex-direction: column; 
+
+  height: 600px; 
+  width: 1500px;
+}
+
+.row1col1, .row2col1
+{
+  flex: 0 0 50%; 
+  -webkit-flex: 0 0 50%; 
+
+  background: blue; 
+}
+
+.row1col2
+{
+  -webkit-flex: 0 0 100%; 
+  flex: 0 0 100%; 
+
+  -webkit-order: 1;
+  order: 1; 
+
+  background: pink; 
+}
+
+.row2col1
+{
+  background: yellow; 
+}
+
+.block
+{
+  background-color: pink;
+}
+
+.ms-Grid
+{
+  width: 80%;
+  margin-left: 10%;
+  background-color: palegreen;
+
+}
+
+td
+{
+  /*background-color: pink; */
+}
+
+table
+{
+  width: 85%;
+  margin-left: 7%;
+  table-layout: fixed;
+}
+
+.mapCol
+{
+  width: 50%;
 }
