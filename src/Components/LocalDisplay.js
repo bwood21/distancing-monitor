@@ -32,7 +32,7 @@ class LocalDisplay extends Component {
     //.ref("Cameras/" + this.state.camID)
     .on("value", snapshot => {
           let log = snapshot.child(snapshot.node_.children_.root_.key + "/Cameras/" + this.state.camID)
-          if(log.val().mscore > 5){
+          if(log.val().mscore > 5){ //TODO: Change this calculation
             this.setState({iswearingmask : false})
           }else{
             this.setState({iswearingmask : true})

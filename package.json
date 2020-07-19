@@ -2,7 +2,6 @@
   "name": "distancing-monitor",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://distancing-monitor.web.app",
   "dependencies": {
     "@fluentui/react": "^7.121.7",
     "@testing-library/jest-dom": "^4.2.4",
@@ -37,5 +36,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.10.5",
+    "@babel/preset-flow": "^7.10.4"
   }
 }
