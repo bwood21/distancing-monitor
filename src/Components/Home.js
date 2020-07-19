@@ -28,7 +28,7 @@ class Home extends Component {
 
     this._selection = new Selection({
       onSelectionChanged: () =>
-        this.setState({ selectionDetails: this._getSelectionDetails() }),
+        this.setState({ selected_url: this._getselected_url() }),
     });
 
     this.state = {
@@ -36,7 +36,7 @@ class Home extends Component {
       averages: [{ mavg: 0, davg: 0, pavg: 0 }],
       options: [{ key: "test", text: "test2" }],
       vidurl:"https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4",
-      selectionDetails: this._getSelectionDetails()
+      selected_url: this._getselected_url()
     };
   }
   async componentDidMount() {
@@ -44,7 +44,7 @@ class Home extends Component {
       .database(firebaseConfig)
       .ref()
       .orderByKey()
-      .limitToFirst(1)
+      .limitToLast(1)
       .on("value", snapshot => {
         this.setState({
           camlist: [],
@@ -75,7 +75,7 @@ class Home extends Component {
   }
 
   render() {
-    let { options } = this.state;
+    let { options, selected_url } = this.state;
     return (
       <div>
         <Card
@@ -100,8 +100,8 @@ class Home extends Component {
             fluid={false}
             width={1000}
             height={500}
-            poster="../Images/mask_green.png"
-            src={this.state.vidurl}
+            autoPlay={true}
+            src={selected_url}
           />
         </div>
         &nbsp;
@@ -235,15 +235,14 @@ class Home extends Component {
     );
   }
 
-  _getSelectionDetails = () => {
+  _getselected_url = () => {
     const selectionCount = this._selection.getSelectedCount();
     switch (selectionCount) {
       case 0:
-        return "Nothing selected";
+        return 0;
       default:
-        console.log(this._selection.getSelection()[0].url)
         return (
-          "Selected project: " + this._selection.getSelection()[0].url
+          this._selection.getSelection()[0].url
         );
     }
   };
