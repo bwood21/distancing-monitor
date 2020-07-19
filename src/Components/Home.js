@@ -8,6 +8,8 @@ import { MarqueeSelection } from "office-ui-fabric-react/lib/MarqueeSelection";
 import {
   DetailsList,
   DetailsListLayoutMode,
+  Selection,
+  SelectionMode
 } from "office-ui-fabric-react/lib/DetailsList";
 import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox'; 
 import { Fabric } from "office-ui-fabric-react/lib/Fabric";
@@ -17,15 +19,27 @@ import {
 } from "office-ui-fabric-react/lib/Dropdown";
 import firebase, { database } from "firebase"
 import firebaseConfig from "./Firebase/firebase";
+//import { Player } from 'video-react'
+//import "../../node_modules/video-react/dist/video-react.css";
 import Terminal from "../Images/indy_terminals.png"; 
+//TODO: database Auth
+let localmonitorpath = "/local/";
 
 class Home extends Component {
   constructor(props) {
     super(props);
+
+    this._selection = new Selection({
+      onSelectionChanged: () =>
+        this.setState({ selectionDetails: this._getSelectionDetails() }),
+    });
+
     this.state = {
-      camlist: [{camID:"0",mscore:1,dscore:3,noti:"yes"}], //sample formatting, erased on load
-      averages: [{mavg:0,davg:0}],
-      options: [{key:"test", text:"test2"}]
+      camlist: [{ camID: "0", mscore: 1, dscore: 3, pscore: 1, url:"" }], //sample formatting, erased on load
+      averages: [{ mavg: 0, davg: 0, pavg: 0 }],
+      options: [{ key: "test", text: "test2" }],
+      vidurl:"https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4",
+      selectionDetails: this._getSelectionDetails()
     };
 
    /* getCamData = () => {
@@ -45,31 +59,59 @@ class Home extends Component {
 async componentDidMount(){
   firebase
   .database(firebaseConfig)
-  .ref("Cameras")
-  .on("value", snapshot => {
-    this.setState({
-      camlist:[],
-      averages:[], //fix this sloppy code later
-      options: []
-     });
-     let mtotal = 0;
-     let dtotal = 0;
-     let iter = 0;
-    snapshot.forEach((snap) => {
-      iter++;
-      let dbcam = {camID: snap.key, mscore: snap.val().mscore, dscore:snap.val().dscore};
-      let options = {key: snap.key, text: snap.key};
-      mtotal += snap.val().mscore;
-      dtotal += snap.val().dscore; 
-      this.setState({
-        camlist:[...this.state.camlist, dbcam],
-        options:[...this.state.options, options]
-       }); 
-    })
-    this.setState({
-      averages:[...this.state.averages, {mavg: mtotal/iter, davg: dtotal/iter}]
-    })
-  })
+      .ref()
+      .orderByKey()
+      .limitToFirst(1)
+      .on("value", snapshot => {
+        this.setState({
+          camlist: [],
+          averages: [], //TODO: fix this sloppy code later
+          options: [],
+          mapareas: [] 
+        });
+        let mtotal = 0;
+        let dtotal = 0;
+        let ptotal = 0;
+        let iter = 0;
+        let areaColor = "";
+        let log = snapshot.child(snapshot.node_.children_.root_.key + "/Cameras") //this doesn't seem like the right way to do this but oh well
+        log.forEach((snap) => { //For each camera
+          iter++;
+          let dbcam = { camID: snap.key, mscore: snap.val().mscore, dscore: snap.val().dscore, pscore: snap.val().pscore, url: snap.val().url };
+          let options = { key: snap.key, text: snap.key };
+          let safescore = (snap.val().mscore + snap.val().dscore) / snap.val().pscore;
+          if(safescore.where("safescore", "<=", 3.33))
+          {
+            //fill color would be green
+            let areaColor = "green";
+          }
+          else if(safescore.where("safescore", ">", 3.33).where("safescore", "<=", 6.66))
+          {
+            //fill color would be yellow
+            let areaColor = "yellow";
+          }
+          else if(safescore.where("safecolor", "<", 6.66).where("safescore", "<=", 10))
+          {
+            //fill color would be red 
+            let areaColor = "red";
+          }
+          
+          let areascore = {camID: snap.key, safescore, areaColor };
+          mtotal += snap.val().mscore;
+          dtotal += snap.val().dscore;
+          ptotal += snap.val().pscore;
+          this.setState({
+            camlist: [...this.state.camlist, dbcam],
+            options: [...this.state.options, options],
+            mapareas: [...this.state.mapareas, areascore]
+          });
+        })
+        this.setState({
+          averages: [...this.state.averages, { mavg: mtotal / iter, davg: dtotal / iter, pavg: ptotal / iter }]
+        })
+        
+
+      })
 
   //this.getCamData(); 
 
@@ -93,6 +135,19 @@ async componentDidMount(){
             DistanceMonitor
           </Card>
          
+        <br />
+
+        <div style={{display: "inline-block"}}>
+          {/*<Player
+            playsInline
+            fluid={false}
+            width={1000}
+            height={500}
+            poster="../Images/mask_green.png"
+            src={this.state.vidurl}
+          /> */}
+        </div>
+
         <Fabric>
     
         <table>
@@ -117,8 +172,14 @@ async componentDidMount(){
                 <Dropdown
                   placeholder="Select Camera ID"
                   options={options}
+                  onChange={(e, selectedOption) => {
+                    localmonitorpath = "/local/" + selectedOption.key
+                  }}
                 />
-                <PrimaryButton href="/local">
+                <PrimaryButton onClick={(e) => { //Must use onClick instead of href because href only runs once on initialization
+                e.preventDefault()
+                window.location.href = localmonitorpath
+              }}>
                   Open Local Monitor
                 </PrimaryButton>
               </Stack>
@@ -163,6 +224,8 @@ async componentDidMount(){
                   styles={{ root: { height: "100%" } }}
                   selectionPreservedOnEmptyClick={true}
                   layoutMode={DetailsListLayoutMode.justified}
+                  selectionMode={SelectionMode.single}
+                  selection={this._selection}
                   enableUpdateAnimations
                 />
               </MarqueeSelection>
@@ -172,33 +235,34 @@ async componentDidMount(){
 
                   <td rowSpan = "3" className = "mapCol">
                   <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5}}
-              style={{
-                margin: "1% 9.5%",
-                padding: "1rem",
-                backgroundColor: "white",
-              }}>
-               
+                  style={{
+                    margin: "1% 9.5%",
+                    padding: "1rem",
+                    backgroundColor: "white",
+                  }}>
 
-                <Stack>
-
+                <Stack>  
+                  {/*placement incorrect or html interfering with code working? */}
+                  maps = {this.state.mapareas};
                   <div className = "base_wrap">
                   <img id = "terminal" src = {Terminal} alt = "Indianapolis Airport: Concourse A and B" /> 
                   
                   <svg id = "terminalMap" viewBox="0 0 521 665" preserveAspectRatio="xMinYMax">
-                    <path id = "arrivalLevel1" className = "red" area-color = "FF0000" d = "M58 482 L81 461 L123 508 L105 529 L58 482 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel2" className = "yellow" area-color = "FFFF00" d = "M81 461 L112 434 L150 472 L123 508 L81 461 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel3" className = "green" area-color = "00FF00" d = "M150 472 L123 508 L163 543 L190 512 L187 537 L187 537 L212 528 L227 537 L245 518 L197 473 L165 486 L150 472 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel4" className = "yellow" area-color = "FFFF00" d = "M123 508 L163 543 L147 562 L105 528 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB3-B5" className = "green" area-color = "00FF00" d = "M31 245 L34 263 L34 284 L86 288 L116 235 L89 219 C89,219 70,239 31,245 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB5-B10" className = "yellow" area-color = "FFFF00" d = "M116 235 L89 219 L133 164 L156 184 L116 235 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB10-B17" className = "red" area-color = "FF0000" d = "M133 164 L156 184 L205 122 L179 104 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB17-B25" className = "green" area-color = "00FF00" d = "M205 122 L179 104 L223 54 L245 72 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "interTerminal1" className = "green" area-color = "00FF00" d = "M86 288 L93 296 C93,296 67,305 50,320 C50,320 67,356 94,388 C94,388 127,412 165,425 C169,425 182,408 187,392 L192,382 L93,296 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "interTerminal2" className = "red" area-color = "FF0000" d = "M116 235 L181 294 L144,342 L86,288 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "interTerminal3" className = "yellow" area-color = "FFFF00" d = "M181 294 L144 342 L223 411 L228 453 L243 451 C243,451 246,416 271,386 L181,294 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA5-A13" className = "red" area-color = "FF0000" d = "M271 386 L255 366 L326 306 L344 327 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA13-A17" className = "yellow" area-color = "FFFF00" d = "M326 306 L344 327 L384 292 L367 270 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA17-A25" className = "green" area-color = "00FF00" d = "M384 292 L367 270 L412 237 L426 256 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "arrivalLevel1" className = {maps[0].areaColor} area-color = "FF0000" d = "M58 482 L81 461 L123 508 L105 529 L58 482 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "arrivalLevel2" className = {maps[1].areaColor} area-color = "FFFF00" d = "M81 461 L112 434 L150 472 L123 508 L81 461 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "arrivalLevel3" className = {maps[2].areaColor}  area-color = "00FF00" d = "M150 472 L123 508 L163 543 L190 512 L187 537 L187 537 L212 528 L227 537 L245 518 L197 473 L165 486 L150 472 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "arrivalLevel4" className = {maps[3].areaColor}  area-color = "FFFF00" d = "M123 508 L163 543 L147 562 L105 528 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conB3-B5" className = {maps[4].areaColor}  area-color = "00FF00" d = "M31 245 L34 263 L34 284 L86 288 L116 235 L89 219 C89,219 70,239 31,245 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conB5-B10" className = {maps[5].areaColor}  area-color = "FFFF00" d = "M116 235 L89 219 L133 164 L156 184 L116 235 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conB10-B17" className = {maps[6].areaColor} area-color = "FF0000" d = "M133 164 L156 184 L205 122 L179 104 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conB17-B25" className = {maps[7].areaColor}  area-color = "00FF00" d = "M205 122 L179 104 L223 54 L245 72 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "interTerminal1" className = {maps[8].areaColor}  area-color = "00FF00" d = "M86 288 L93 296 C93,296 67,305 50,320 C50,320 67,356 94,388 C94,388 127,412 165,425 C169,425 182,408 187,392 L192,382 L93,296 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "interTerminal2" className = {maps[9].areaColor}  area-color = "FF0000" d = "M116 235 L181 294 L144,342 L86,288 Z" strokeWidth = "2" stroke = "green"/>
+                    {/*Extra paths will be turned grey.  */}
+                    <path id = "interTerminal3" className = "grey" area-color = "FFFF00" d = "M181 294 L144 342 L223 411 L228 453 L243 451 C243,451 246,416 271,386 L181,294 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conA5-A13" className = "grey" area-color = "FF0000" d = "M271 386 L255 366 L326 306 L344 327 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conA13-A17" className = "grey" area-color = "FFFF00" d = "M326 306 L344 327 L384 292 L367 270 Z" strokeWidth = "2" stroke = "green"/>
+                    <path id = "conA17-A25" className = "grey" area-color = "00FF00" d = "M384 292 L367 270 L412 237 L426 256 Z" strokeWidth = "2" stroke = "green"/>
                   </svg>
                   
                   </div>
@@ -237,6 +301,14 @@ async componentDidMount(){
                         maxWidth: 100,
                         isResizable: true,
                     },
+                    {
+                      key: "column3",
+                      name: "People Average",
+                      fieldName: "pavg",
+                      minWidth: 50,
+                      maxWidth: 100,
+                      isResizable: true,
+                    }
                   ]}
                   styles={{ root: { height: "100%" } }}
                   selectionPreservedOnEmptyClick={true}
@@ -258,7 +330,7 @@ async componentDidMount(){
 
                           <Stack>Terminal Map Key</Stack>
                           <Stack>
-                              const CheckboxBasicExample: React.FunctionComponent = () =>{
+                           {/*   const CheckboxBasicExample: React.FunctionComponent = () =>{
                               return(
                                 <table>
                                     <tbody>
@@ -278,7 +350,7 @@ async componentDidMount(){
                                     </tbody>
                                   </table>
                               )
-                            }
+                            } */}
                           </Stack>
                         </Card>
                   </td>
@@ -315,6 +387,18 @@ async componentDidMount(){
     );
   }
 
+  _getSelectionDetails = () => {
+    const selectionCount = this._selection.getSelectedCount();
+    switch (selectionCount) {
+      case 0:
+        return "Nothing selected";
+      default:
+        console.log(this._selection.getSelection()[0].url)
+        return (
+          "Selected project: " + this._selection.getSelection()[0].url
+        );
+    }
+  };
 
   _onRenderRow = (props) => {
     const customStyles = {};
@@ -351,7 +435,24 @@ async componentDidMount(){
     }
       
 
-    
+   /* _areaScore = (props) =>
+    {
+      if areascore <= 3.33
+      {
+        //fill color would be green
+        className = "green"; 
+      }
+      else if areascore > 3.33 and areascore <= 6.66
+      {
+        //fill color would be yellow
+        className = "yellow"; 
+      }
+      else
+      {
+        //fill color would be red 
+        className = "red"; 
+      }
+    } 
     
       /*  if(valColor == "FF0000")
         {

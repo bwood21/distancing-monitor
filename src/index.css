@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;;
-  background-color: #faf9f8;
+  background-color: #f2f5f7;
 }
 
 code {
@@ -26,6 +26,11 @@ svg:hover .yellow
 svg:hover .green
 {
   fill: #00FF00; 
+}
+
+svg:hover .grey
+{
+  fill: grey; 
 }
 
 h1
