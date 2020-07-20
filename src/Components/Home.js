@@ -72,23 +72,7 @@ class Home extends Component {
           let options = { key: snap.key, text: snap.key };
           let safescore = (snap.val().mscore + snap.val().dscore) / snap.val().pscore; //TODO: change this calculation
           let initialsafescore = (snap.val().mscore[0] + snap.val().dscore[0]) / snap.val().pscore[0];
-          let areaColor = "";
-          if(initialsafescore <= 3.33)
-          {
-            //fill color would be green
-            areaColor = "green";
-          }
-          else if(initialsafescore > 3.33 && initialsafescore <= 6.66)
-          {
-            //fill color would be yellow
-            areaColor = "yellow";
-          }
-          else if(initialsafescore < 6.66 && initialsafescore <= 10)
-          {
-            //fill color would be red 
-            areaColor = "red";
-          }
-          
+          let areaColor = this.setMap(initialsafescore)
           let areascore = {camID: snap.key, safescore: initialsafescore, areaColor: areaColor }; //TODO : remove safescore?
           mtotal += snap.val().mscore[0];
           dtotal += snap.val().dscore[0];
@@ -106,19 +90,49 @@ class Home extends Component {
       })
   }
 
+  setMap (safescore){
+    let areaColor = ""
+    if(safescore <= 3.33)
+    {
+      //fill color would be green
+      areaColor = "green";
+    }
+    else if(safescore > 3.33 && safescore <= 6.66)
+    {
+      //fill color would be yellow
+      areaColor = "yellow";
+    }
+    else if(safescore < 6.66 && safescore <= 10)
+    {
+      //fill color would be red 
+      areaColor = "red";
+    }
+    return areaColor
+  }
+
   setScores(camera){
-    //let objIndex = this.state.camlist.findIndex((obj => obj.camID == camera.camID));
 
     let cams = [...this.state.camlist]
     let camarrays = {...cams[camera]}
 
     let items = [...this.state.displaylist]
     let item = {...items[camera]}
-    item.mscore = camarrays.mscore[this.state.seconds]
+
+    item.mscore = camarrays.mscore[this.state.seconds] //setting new values
     item.pscore = camarrays.pscore[this.state.seconds]
     item.dscore = camarrays.dscore[this.state.seconds]
-    items[camera] = item
-    this.setState({displaylist: items})
+    items[camera] = item //put item back
+
+    let mapIndex = this.state.mapareas.findIndex((obj => obj.camID == this.state.camlist[camera].camID));
+
+    let maps = [this.state.mapareas]
+    let map = {...maps[mapIndex]}
+
+    let score = (item.mscore + item.dscore) / item.pscore; //TODO: change this calculation
+    map.safescore = score
+    map.areaColor = this.setMap(score)
+    maps[mapIndex] = map
+    this.setState({displaylist: items, mapareas: maps}) //replace items
   }
 
   StartTimer(camera) {
