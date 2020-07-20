@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import 'office-ui-fabric-react/dist/css/fabric.css';
 import { PrimaryButton } from "office-ui-fabric-react";
 import { Card } from "@uifabric/react-cards";
@@ -28,19 +28,21 @@ let localmonitorpath = "/local/";
 class Home extends Component {
   constructor(props) {
     super(props);
-
     this._selection = new Selection({
       onSelectionChanged: () =>
         this.setState({ selected_url: this._getselected_url() }),
     });
 
     this.state = {
-      camlist: [{ camID: "0", mscore: 1, dscore: 3, pscore: 1, url:"" }], //sample formatting, erased on load
+      camlist: [{ camID: "0", mscore: [], dscore: [], pscore: [], url:"" }], //sample formatting, erased on load
+      displaylist:[{ camID: "0", mscore: 0, dscore: 0 , pscore: 0, url:"" }],
       averages: [{ mavg: 0, davg: 0, pavg: 0 }],
       options: [{ key: "test", text: "test2" }],
       mapareas: [{camID: 1, safescore: 1, areaColor: "green"}],
-      vidurl:"https://www.radiantmediaplayer.com/media/big-buck-bunny-360p.mp4",
-      selected_url: this._getselected_url()
+      vidurl:"",
+      selected_url: this._getselected_url(),
+      seconds:0,
+      new_url:""
     };
 
   }
@@ -55,7 +57,8 @@ class Home extends Component {
           camlist: [],
           averages: [], //TODO: fix this sloppy code later
           options: [],
-          mapareas: [] 
+          mapareas: [],
+          displaylist: []
         });
         let mtotal = 0;
         let dtotal = 0;
@@ -65,33 +68,36 @@ class Home extends Component {
         log.forEach((snap) => { //For each camera
           iter++;
           let dbcam = { camID: snap.key, mscore: snap.val().mscore, dscore: snap.val().dscore, pscore: snap.val().pscore, url: snap.val().url };
+          let initialvals = { camID: snap.key, mscore: snap.val().mscore[0], dscore: snap.val().dscore[0], pscore: snap.val().pscore[0], url: snap.val().url };
           let options = { key: snap.key, text: snap.key };
           let safescore = (snap.val().mscore + snap.val().dscore) / snap.val().pscore; //TODO: change this calculation
+          let initialsafescore = (snap.val().mscore[0] + snap.val().dscore[0]) / snap.val().pscore[0];
           let areaColor = "";
-          if(safescore <= 3.33)
+          if(initialsafescore <= 3.33)
           {
             //fill color would be green
             areaColor = "green";
           }
-          else if(safescore > 3.33 && safescore <= 6.66)
+          else if(initialsafescore > 3.33 && initialsafescore <= 6.66)
           {
             //fill color would be yellow
             areaColor = "yellow";
           }
-          else if(safescore < 6.66 && safescore <= 10)
+          else if(initialsafescore < 6.66 && initialsafescore <= 10)
           {
             //fill color would be red 
             areaColor = "red";
           }
           
-          let areascore = {camID: snap.key, safescore: safescore, areaColor: areaColor }; //TODO : remove safescore?
-          mtotal += snap.val().mscore;
-          dtotal += snap.val().dscore;
-          ptotal += snap.val().pscore;
+          let areascore = {camID: snap.key, safescore: initialsafescore, areaColor: areaColor }; //TODO : remove safescore?
+          mtotal += snap.val().mscore[0];
+          dtotal += snap.val().dscore[0];
+          ptotal += snap.val().pscore[0];
           this.setState({
             camlist: [...this.state.camlist, dbcam],
             options: [...this.state.options, options],
-            mapareas: [...this.state.mapareas, areascore]
+            mapareas: [...this.state.mapareas, areascore],
+            displaylist: [...this.state.displaylist, initialvals]
           });
         })
         this.setState({
@@ -100,8 +106,41 @@ class Home extends Component {
       })
   }
 
+  setScores(camera){
+    //let objIndex = this.state.camlist.findIndex((obj => obj.camID == camera.camID));
+
+    let cams = [...this.state.camlist]
+    let camarrays = {...cams[camera]}
+
+    let items = [...this.state.displaylist]
+    let item = {...items[camera]}
+    item.mscore = camarrays.mscore[this.state.seconds]
+    item.pscore = camarrays.pscore[this.state.seconds]
+    item.dscore = camarrays.dscore[this.state.seconds]
+    items[camera] = item
+    this.setState({displaylist: items})
+  }
+
+  StartTimer(camera) {
+    let interval = null;
+
+      interval = setInterval(() => {
+        this.setState({seconds: this.state.seconds + 1})
+        if(this.state.seconds >= 6){
+          this.resetPlayback()
+          clearInterval(interval)
+        }
+        this.setScores(camera);
+      }, 1000);
+    return () => clearInterval(interval);
+  }
+
+  resetPlayback() {
+    this.setState({seconds:0})
+  }
+
   render() {
-    let { options, selected_url } = this.state;
+    let { options, selected_url, seconds } = this.state;
     return (
       <div>
         <Card
@@ -114,7 +153,7 @@ class Home extends Component {
             marginTop: "2rem",
           }}
         >
-          DistanceMonitor
+          DistanceMonitor {seconds}
           </Card>
           &nbsp;
         <div>
@@ -127,7 +166,7 @@ class Home extends Component {
             width={1000}
             height={500}
             autoPlay={true}
-            src={selected_url}
+            src={this.state.new_url}
           />
         </div>
         &nbsp;
@@ -171,6 +210,9 @@ class Home extends Component {
                   options={options}
                   onChange={(e, selectedOption) => {
                     localmonitorpath = "/local/" + selectedOption.key
+                    let index = this.state.camlist.findIndex((obj => obj.camID == selectedOption.key));
+                    this.state.new_url = this.state.camlist[index].url;
+                    this.StartTimer(index)
                   }}
                 />
                 <PrimaryButton onClick={(e) => { //Must use onClick instead of href because href only runs once on initialization
@@ -183,7 +225,7 @@ class Home extends Component {
               <MarqueeSelection>
                 <DetailsList
                   onRenderRow={this._onRenderRow}
-                  items={this.state.camlist}
+                  items={this.state.displaylist}
                   columns={[
                     {
                         key: "column1",
@@ -211,8 +253,8 @@ class Home extends Component {
                     },
                     {
                         key: "column4",
-                        name: "Notifications",
-                        fieldName: "noti",
+                        name: "Population",
+                        fieldName: "pscore",
                         minWidth: 50,
                         maxWidth: 100,
                         isResizable: true,
@@ -383,18 +425,6 @@ class Home extends Component {
     );
   }
 
-  _getSelectionDetails = () => {
-    const selectionCount = this._selection.getSelectedCount();
-    switch (selectionCount) {
-      case 0:
-        return "Nothing selected";
-      default:
-        console.log(this._selection.getSelection()[0].url)
-        return (
-          "Selected project: " + this._selection.getSelection()[0].url
-        );
-    }
-  };
 
   _getselected_url = () => {
     const selectionCount = this._selection.getSelectedCount();
@@ -402,6 +432,7 @@ class Home extends Component {
       case 0:
         return 0;
       default:
+        //this.StartTimer(this._selection.getSelection()[0]);
         return (
           this._selection.getSelection()[0].url
         );
