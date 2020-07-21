@@ -190,7 +190,7 @@ class Home extends Component {
   render() {
     let { options, seconds } = this.state;
     return (
-      <div>
+      <div className = "totalWrap">
         <Card
           className="nav"
           tokens={{ width: "77%", maxWidth: 1600, childrenGap: 5 }}
@@ -411,7 +411,8 @@ class Home extends Component {
 
         </Fabric>
       </div>
-
+    );
+}
   _onRenderRow = (props) => {
     const customStyles = {};
     if (props) {
