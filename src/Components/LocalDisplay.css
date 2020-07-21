@@ -1,14 +1,17 @@
 .background-green{
     background-color: lightgreen;
-    height:923px;
+    height:403px;
+    margin: 10%;
 }
 .background-red{
     background-color: lightcoral;
-    height:923px;
+    height:403px;
+    margin: 10%;
 }
 .background-yellow{
     background-color: lightyellow;
-    height: 923px;
+    height: 403px;
+    margin: 10%; 
 }
 h1 {
     color: black;
