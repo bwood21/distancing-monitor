@@ -1,0 +1,45 @@
+[
+  {
+    "entity": "project-owners-696350982150",
+    "projectTeam": {
+      "projectNumber": "696350982150",
+      "team": "owners"
+    },
+    "role": "OWNER"
+  },
+  {
+    "entity": "project-editors-696350982150",
+    "projectTeam": {
+      "projectNumber": "696350982150",
+      "team": "editors"
+    },
+    "role": "OWNER"
+  },
+  {
+    "entity": "project-viewers-696350982150",
+    "projectTeam": {
+      "projectNumber": "696350982150",
+      "team": "viewers"
+    },
+    "role": "READER"
+  },
+  {
+    "email": "696350982150-compute@developer.gserviceaccount.com",
+    "entity": "user-696350982150-compute@developer.gserviceaccount.com",
+    "role": "OWNER"
+  },
+  {
+    "email": "vuppala.saiganesh26@gmail.com",
+    "entity": "user-vuppala.saiganesh26@gmail.com",
+    "role": "READER"
+  },
+  {
+    "email": "brandonwood997@gmail.com",
+    "entity": "user-brandonwood997@gmail.com",
+    "role": "OWNER"
+  },
+  {
+    "entity": "allUsers",
+    "role": "READER"
+  }
+]
