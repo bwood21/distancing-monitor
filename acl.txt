@@ -1,37 +1,32 @@
 [
   {
-    "entity": "project-owners-696350982150",
+    "entity": "project-owners-##########",
     "projectTeam": {
-      "projectNumber": "696350982150",
+      "projectNumber": "#########",
       "team": "owners"
     },
     "role": "OWNER"
   },
   {
-    "entity": "project-editors-696350982150",
+    "entity": "project-editors-##########",
     "projectTeam": {
-      "projectNumber": "696350982150",
+      "projectNumber": "##########",
       "team": "editors"
     },
     "role": "OWNER"
   },
   {
-    "entity": "project-viewers-696350982150",
+    "entity": "project-viewers-#########",
     "projectTeam": {
-      "projectNumber": "696350982150",
+      "projectNumber": "##########",
       "team": "viewers"
     },
     "role": "READER"
   },
   {
-    "email": "696350982150-compute@developer.gserviceaccount.com",
-    "entity": "user-696350982150-compute@developer.gserviceaccount.com",
+    "email": "#########-compute@developer.gserviceaccount.com",
+    "entity": "user-##########-compute@developer.gserviceaccount.com",
     "role": "OWNER"
-  },
-  {
-    "email": "vuppala.saiganesh26@gmail.com",
-    "entity": "user-vuppala.saiganesh26@gmail.com",
-    "role": "READER"
   },
   {
     "email": "brandonwood997@gmail.com",
