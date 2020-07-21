@@ -1,0 +1,40 @@
+[
+  {
+    "entity": "project-owners-##########",
+    "projectTeam": {
+      "projectNumber": "#########",
+      "team": "owners"
+    },
+    "role": "OWNER"
+  },
+  {
+    "entity": "project-editors-##########",
+    "projectTeam": {
+      "projectNumber": "##########",
+      "team": "editors"
+    },
+    "role": "OWNER"
+  },
+  {
+    "entity": "project-viewers-#########",
+    "projectTeam": {
+      "projectNumber": "##########",
+      "team": "viewers"
+    },
+    "role": "READER"
+  },
+  {
+    "email": "#########-compute@developer.gserviceaccount.com",
+    "entity": "user-##########-compute@developer.gserviceaccount.com",
+    "role": "OWNER"
+  },
+  {
+    "email": "brandonwood997@gmail.com",
+    "entity": "user-brandonwood997@gmail.com",
+    "role": "OWNER"
+  },
+  {
+    "entity": "allUsers",
+    "role": "READER"
+  }
+]
