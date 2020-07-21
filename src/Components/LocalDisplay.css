@@ -29,3 +29,20 @@ h1 {
 .transition {
     visibility: hidden;
 }
+
+#colors
+{
+  width: 100%; 
+  height: auto;
+  position: absolute; 
+  z-index: -10; 
+  background: linear-gradient(45deg, rgba(66, 135, 245, 0.50), rgba(24, 60, 242, 0.45), rgba(141, 79, 247, 0.45), rgba(127, 57, 247, 0.45), rgba(100, 187, 250, 0.45), rgba(90, 19, 242, 0.45));
+  background-size: 600% 100%;
+  animation: gradient 16s linear infinite; 
+  animation-direction: alternate;  
+}
+@keyframes gradient
+{
+  0% {background-position: 0%}
+  100% {background-position: 100%}
+} 

@@ -193,7 +193,7 @@ class Home extends Component {
       <div>
         <Card
           className="nav"
-          tokens={{ width: "60%", maxWidth: 1600, childrenGap: 5 }}
+          tokens={{ width: "77%", maxWidth: 1600, childrenGap: 5 }}
           style={{
             margin: "0 auto",
             padding: "1rem",
@@ -239,9 +239,9 @@ class Home extends Component {
               <tr>
                 <td>
                   <Card
-                    tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
+                    tokens={{ width: "90%", maxWidth: 1600, childrenGap: 5 }}
                     style={{
-                      margin: "0 13%",
+                      margin: "-2% 13%",
                       padding: "0.25rem",
                       backgroundColor: "white",
                     }}
@@ -321,7 +321,7 @@ class Home extends Component {
                 </td>
 
 
-                <td rowSpan="3" className="mapCol">
+                <td rowSpan="2" className="mapCol">
                   <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
                     style={{
                       margin: "1% 9.5%",
@@ -361,7 +361,7 @@ class Home extends Component {
 
               <tr>
                 <td>
-                  <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
+                  <Card tokens={{ width: "90%", maxWidth: 1600, childrenGap: 5 }}
                     style={{
                       margin: "0 13%",
                       padding: "1rem",
@@ -406,87 +406,11 @@ class Home extends Component {
                 </td>
               </tr>
 
-              <tr>
-                <td>
-                  <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
-                    style={{
-                      margin: "0 13%",
-                      padding: "1rem",
-                      backgroundColor: "white"
-                    }}>
-
-                    <Stack>Terminal Map Key</Stack>
-                    <Stack>
-                      {/*   const CheckboxBasicExample: React.FunctionComponent = () =>{
-                              return(
-                                <table>
-                                    <tbody>
-                                      <tr>
-                                        <td>
-                                          <Checkbox label = "Red - Severe Risk" divAssoc = "FF0000" onChange = {this._mapChange} />
-                                        </td>
-
-                                        <td>
-                                          <Checkbox label = "Yellow - Moderate Risk" divAssoc = "FFFF00" onChange = {_mapChange} />
-                                        </td>
-
-                                        <td>
-                                          <Checkbox label = "Green - Miniscule Risk" divAssoc = "00FF00" onChange = {_mapChange} /> 
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                              )
-                            } */}
-                    </Stack>
-                  </Card>
-                </td>
-              </tr>
-
             </tbody>
           </table>
 
         </Fabric>
       </div>
-
-
-
-
-      /* <div className = "mainBox">
-         <div className = "row1col1">
-         
-         </div>
-         <div className = "row1col2">
-                 
-         </div>
-         <div className = "row2col1">
-         
-         </div>
-       </div> */
-
-
-      /*</div> <div>
-         <br />
-      </div> */
-
-
-
-    );
-  }
-
-
-  /*   _getselected_url = () => {
-      const selectionCount = this._selection.getSelectedCount();
-      switch (selectionCount) {
-        case 0:
-          return 0;
-        default:
-          //this.StartTimer(this._selection.getSelection()[0]);
-          return (
-            this._selection.getSelection()[0].url
-          );
-      }
-    }; */
 
   _onRenderRow = (props) => {
     const customStyles = {};
@@ -517,58 +441,6 @@ class Home extends Component {
         break;
       }
     }
-
-
-    /* _areaScore = (props) =>
-     {
-       if areascore <= 3.33
-       {
-         //fill color would be green
-         className = "green"; 
-       }
-       else if areascore > 3.33 and areascore <= 6.66
-       {
-         //fill color would be yellow
-         className = "yellow"; 
-       }
-       else
-       {
-         //fill color would be red 
-         className = "red"; 
-       }
-     } 
-     
-       /*  if(valColor == "FF0000")
-         {
-             
-         }
- 
-         else if(valColor == "FF0000" and valColor == "FFFF00")
-         {
- 
-         }
-         else if(valColor == "FF0000" and valColor == "00FF00")
-         {
- 
-         }
-         else if(valColor == "FFFF00")
-         {
- 
-         }
-         else if(valColor == "FFFF00"  and valColor == "00FF00")
-         {
- 
-         }
-         else if(valColor == "00FF00")
-         {
- 
-         }
-         else if(valColor =="FF0000" and valColor == "FFFF00" and valColor == "00FF00")
-         {
- 
-         }
- */
-
 
   }
 
