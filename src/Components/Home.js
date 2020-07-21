@@ -1,9 +1,8 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { Component } from "react";
 import 'office-ui-fabric-react/dist/css/fabric.css';
 import { PrimaryButton } from "office-ui-fabric-react";
 import { Card } from "@uifabric/react-cards";
 import { Stack } from "office-ui-fabric-react/lib/Stack";
-import { TextField } from "office-ui-fabric-react/lib/TextField";
 import { MarqueeSelection } from "office-ui-fabric-react/lib/MarqueeSelection";
 import {
   DetailsList,
@@ -11,7 +10,7 @@ import {
   Selection,
   SelectionMode
 } from "office-ui-fabric-react/lib/DetailsList";
-import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox'; 
+import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 import { Fabric } from "office-ui-fabric-react/lib/Fabric";
 import { DetailsRow } from "office-ui-fabric-react/lib/DetailsList";
 import {
@@ -21,28 +20,30 @@ import firebase, { database } from "firebase"
 import firebaseConfig from "./Firebase/firebase";
 import { Player } from 'video-react'
 import "../../node_modules/video-react/dist/video-react.css";
-import Terminal from "../Images/indy_terminals.png"; 
+import Terminal from "../Images/indy_terminals.png";
 //TODO: database Auth
 let localmonitorpath = "/local/";
-
+const timeinterval = 1000 //milliseconds
+const numinterval = 6
 class Home extends Component {
   constructor(props) {
     super(props);
-    this._selection = new Selection({
-      onSelectionChanged: () =>
-        this.setState({ selected_url: this._getselected_url() }),
-    });
+    /*     this._selection = new Selection({
+          onSelectionChanged: () =>
+            this.setState({ selected_url: this._getselected_url() }),
+        }); */
 
     this.state = {
-      camlist: [{ camID: "0", mscore: [], dscore: [], pscore: [], url:"" }], //sample formatting, erased on load
-      displaylist:[{ camID: "0", mscore: 0, dscore: 0 , pscore: 0, url:"" }],
+      camlist: [{ camID: "0", mscore: [], dscore: [], pscore: [], url: "" }], //sample formatting, erased on load
+      displaylist: [{ camID: "0", mscore: 0, dscore: 0, pscore: 0, url: "" }],
       averages: [{ mavg: 0, davg: 0, pavg: 0 }],
       options: [{ key: "test", text: "test2" }],
-      mapareas: [{camID: 1, safescore: 1, areaColor: "green"}],
-      vidurl:"",
-      selected_url: this._getselected_url(),
-      seconds:0,
-      new_url:""
+      mapareas: [{ camID: 1, safescore: 1, areaColor: "green" }],
+      vidurl: "",
+      //selected_url: this._getselected_url(),
+      seconds: 0,
+      new_url: "",
+      currentlyselected: ""
     };
 
   }
@@ -73,7 +74,7 @@ class Home extends Component {
           let safescore = (snap.val().mscore + snap.val().dscore) / snap.val().pscore; //TODO: change this calculation
           let initialsafescore = (snap.val().mscore[0] + snap.val().dscore[0]) / snap.val().pscore[0];
           let areaColor = this.setMap(initialsafescore)
-          let areascore = {camID: snap.key, safescore: initialsafescore, areaColor: areaColor }; //TODO : remove safescore?
+          let areascore = { camID: snap.key, safescore: initialsafescore, areaColor: areaColor }; //TODO : remove safescore?
           mtotal += snap.val().mscore[0];
           dtotal += snap.val().dscore[0];
           ptotal += snap.val().pscore[0];
@@ -85,38 +86,35 @@ class Home extends Component {
           });
         })
         this.setState({
-          averages: [...this.state.averages, { mavg: mtotal / iter, davg: dtotal / iter, pavg: ptotal / iter }]
+          averages: [...this.state.averages, { mavg: mtotal / iter, davg: dtotal / iter, pavg: ptotal / iter }] //TODO : average rounding
         })
       })
   }
 
-  setMap (safescore){
+  setMap(safescore) {
     let areaColor = ""
-    if(safescore <= 3.33)
-    {
+    if (safescore <= 3.33) {
       //fill color would be green
       areaColor = "green";
     }
-    else if(safescore > 3.33 && safescore <= 6.66)
-    {
+    else if (safescore > 3.33 && safescore <= 6.66) {
       //fill color would be yellow
       areaColor = "yellow";
     }
-    else if(safescore < 6.66 && safescore <= 10)
-    {
+    else if (safescore < 6.66 && safescore <= 10) {
       //fill color would be red 
       areaColor = "red";
     }
     return areaColor
   }
 
-  setScores(camera){
+  setScores(camera) {
 
     let cams = [...this.state.camlist]
-    let camarrays = {...cams[camera]}
+    let camarrays = { ...cams[camera] }
 
     let items = [...this.state.displaylist]
-    let item = {...items[camera]}
+    let item = { ...items[camera] }
 
     item.mscore = camarrays.mscore[this.state.seconds] //setting new values
     item.pscore = camarrays.pscore[this.state.seconds]
@@ -126,35 +124,75 @@ class Home extends Component {
     let mapIndex = this.state.mapareas.findIndex((obj => obj.camID == this.state.camlist[camera].camID));
 
     let maps = [this.state.mapareas]
-    let map = {...maps[mapIndex]}
+    let map = { ...maps[mapIndex] }
 
     let score = (item.mscore + item.dscore) / item.pscore; //TODO: change this calculation
     map.safescore = score
     map.areaColor = this.setMap(score)
     maps[mapIndex] = map
-    this.setState({displaylist: items, mapareas: maps}) //replace items
+
+    let iter = 0;
+    let mavg = 0;
+    let davg = 0;
+    let pavg = 0;
+    this.state.displaylist.forEach(element => {
+      iter++;
+      mavg += element.mscore
+      davg += element.dscore
+      pavg += element.pscore
+    });
+    this.setState({
+      averages: [{ mavg: mavg / iter, davg: davg / iter, pavg: pavg / iter }] //TODO : average rounding
+    })
+    this.setState({ displaylist: items, mapareas: maps }) //replace items
   }
 
-  StartTimer(camera) {
+  StartTimer(camera) { //poor mans video sync
     let interval = null;
 
-      interval = setInterval(() => {
-        this.setState({seconds: this.state.seconds + 1})
-        if(this.state.seconds >= 6){
-          this.resetPlayback()
-          clearInterval(interval)
-        }
+    interval = setInterval(() => {
+      this.setState({ seconds: this.state.seconds + 1 })
+      if (this.state.seconds > numinterval) {
+        this.resetPlayback()
+        clearInterval(interval)
+      } else {
+        firebase
+          .database(firebaseConfig)
+          .ref()
+          .orderByKey()
+          .limitToLast(1)
+          .once("value", snapshot => {
+            let timestamp = snapshot.child(snapshot.node_.children_.root_.key)
+            let cameras = timestamp.child(timestamp.node_.children_.root_.key)
+            let cam = cameras.child(this.state.currentlyselected)
+            console.log(cam)
+            cam.ref.child("Active").set(true)
+          })
+
         this.setScores(camera);
-      }, 1000);
+      }
+    }, timeinterval);
     return () => clearInterval(interval);
   }
 
   resetPlayback() {
-    this.setState({seconds:0})
+    this.setState({ seconds: 0 })
+    firebase
+      .database(firebaseConfig)
+      .ref()
+      .orderByKey()
+      .limitToLast(1)
+      .once("value", snapshot => {
+        let timestamp = snapshot.child(snapshot.node_.children_.root_.key)
+        let cameras = timestamp.child(timestamp.node_.children_.root_.key)
+        let cam = cameras.child(this.state.currentlyselected)
+        console.log(cam)
+        cam.ref.child("Active").set(false)
+      })
   }
 
   render() {
-    let { options, selected_url, seconds } = this.state;
+    let { options, seconds } = this.state;
     return (
       <div>
         <Card
@@ -168,12 +206,12 @@ class Home extends Component {
           }}
         >
           DistanceMonitor {seconds}
-          </Card>
+        </Card>
           &nbsp;
         <div>
           <br />
         </div>
-        <div style={{display: "inline-block"}}>
+        <div style={{ display: "inline-block" }}>
           <Player
             playsInline
             fluid={false}
@@ -184,10 +222,10 @@ class Home extends Component {
           />
         </div>
         &nbsp;
-         
+
         <br />
 
-        <div style={{display: "inline-block"}}>
+        <div style={{ display: "inline-block" }}>
           {/*<Player
             playsInline
             fluid={false}
@@ -199,190 +237,191 @@ class Home extends Component {
         </div>
 
         <Fabric>
-    
-        <table>
-             <tbody>
-               <tr>
-                  <td>
+
+          <table>
+            <tbody>
+              <tr>
+                <td>
                   <Card
-              tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
-              style={{
-                margin: "0 13%",
-                padding: "0.25rem",
-                backgroundColor: "white",
-              }}
-            >
-              <Stack horizontalAlign="left"><b>Camera Feeds</b></Stack>
+                    tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
+                    style={{
+                      margin: "0 13%",
+                      padding: "0.25rem",
+                      backgroundColor: "white",
+                    }}
+                  >
+                    <Stack horizontalAlign="left"><b>Camera Feeds</b></Stack>
               &nbsp;
               <Stack
-                horizontalAlign="center"
-                horizontal
-                tokens={{ childrenGap: 10 }}
-              >
-                <Dropdown
-                  placeholder="Select Camera ID"
-                  options={options}
-                  onChange={(e, selectedOption) => {
-                    localmonitorpath = "/local/" + selectedOption.key
-                    let index = this.state.camlist.findIndex((obj => obj.camID == selectedOption.key));
-                    this.state.new_url = this.state.camlist[index].url;
-                    this.StartTimer(index)
-                  }}
-                />
-                <PrimaryButton onClick={(e) => { //Must use onClick instead of href because href only runs once on initialization
-                e.preventDefault()
-                window.location.href = localmonitorpath
-              }}>
-                  Open Local Monitor
+                      horizontalAlign="center"
+                      horizontal
+                      tokens={{ childrenGap: 10 }}
+                    >
+                      <Dropdown
+                        placeholder="Select Camera ID"
+                        options={options}
+                        onChange={(e, selectedOption) => {
+                          localmonitorpath = "/local/" + selectedOption.key
+                          let index = this.state.camlist.findIndex((obj => obj.camID == selectedOption.key));
+                          this.setState({ currentlyselected: selectedOption.key })
+                          this.setState({ new_url: this.state.camlist[index].url })
+                          this.StartTimer(index)
+                        }}
+                      />
+                      <PrimaryButton onClick={(e) => { //Must use onClick instead of href because href only runs once on initialization
+                        e.preventDefault()
+                        window.location.href = localmonitorpath
+                      }}>
+                        Open Local Monitor
                 </PrimaryButton>
-              </Stack>
-              <MarqueeSelection>
-                <DetailsList
-                  onRenderRow={this._onRenderRow}
-                  items={this.state.displaylist}
-                  columns={[
-                    {
-                        key: "column1",
-                        name: "Camera ID",
-                        fieldName: "camID",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    },
-                    {
-                        key: "column2",
-                        name: "Mask Score",
-                        fieldName: "mscore",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    },
-                    {
-                        key: "column3",
-                        name: "Distancing Score",
-                        fieldName: "dscore",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    },
-                    {
-                        key: "column4",
-                        name: "Population",
-                        fieldName: "pscore",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    }
-                  ]}
-                  styles={{ root: { height: "100%" } }}
-                  selectionPreservedOnEmptyClick={true}
-                  layoutMode={DetailsListLayoutMode.justified}
-                  selectionMode={SelectionMode.single}
-                  selection={this._selection}
-                  enableUpdateAnimations
-                />
-              </MarqueeSelection>
-            </Card>
-                  </td>
+                    </Stack>
+                    <MarqueeSelection>
+                      <DetailsList
+                        onRenderRow={this._onRenderRow}
+                        items={this.state.displaylist}
+                        columns={[
+                          {
+                            key: "column1",
+                            name: "Camera ID",
+                            fieldName: "camID",
+                            minWidth: 50,
+                            maxWidth: 100,
+                            isResizable: true,
+                          },
+                          {
+                            key: "column2",
+                            name: "Mask Score",
+                            fieldName: "mscore",
+                            minWidth: 50,
+                            maxWidth: 100,
+                            isResizable: true,
+                          },
+                          {
+                            key: "column3",
+                            name: "Distancing Score",
+                            fieldName: "dscore",
+                            minWidth: 50,
+                            maxWidth: 100,
+                            isResizable: true,
+                          },
+                          {
+                            key: "column4",
+                            name: "Population",
+                            fieldName: "pscore",
+                            minWidth: 50,
+                            maxWidth: 100,
+                            isResizable: true,
+                          }
+                        ]}
+                        styles={{ root: { height: "100%" } }}
+                        selectionPreservedOnEmptyClick={true}
+                        layoutMode={DetailsListLayoutMode.justified}
+                        selectionMode={SelectionMode.single}
+                        selection={this._selection}
+                        enableUpdateAnimations
+                      />
+                    </MarqueeSelection>
+                  </Card>
+                </td>
 
 
-                  <td rowSpan = "3" className = "mapCol">
-                  <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5}}
-                  style={{
-                    margin: "1% 9.5%",
-                    padding: "1rem",
-                    backgroundColor: "white",
-                  }}>
-
-                <Stack>  
-                  {/*placement incorrect or html interfering with code working? */}
-                  <div className = "base_wrap">
-                  <img id = "terminal" src = {Terminal} alt = "Indianapolis Airport: Concourse A and B" />
-                  
-                  <svg id = "terminalMap" viewBox="0 0 521 665" preserveAspectRatio="xMinYMax">
-                    <path id = "arrivalLevel1" className = {this.state.mapareas[0] ? this.state.mapareas[0].areaColor : "grey"} area-color = "FF0000" d = "M58 482 L81 461 L123 508 L105 529 L58 482 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel2" className = {this.state.mapareas[1] ? this.state.mapareas[1].areaColor : "grey"} area-color = "FFFF00" d = "M81 461 L112 434 L150 472 L123 508 L81 461 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel3" className = {this.state.mapareas[2] ? this.state.mapareas[2].areaColor : "grey"}  area-color = "00FF00" d = "M150 472 L123 508 L163 543 L190 512 L187 537 L187 537 L212 528 L227 537 L245 518 L197 473 L165 486 L150 472 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "arrivalLevel4" className = {this.state.mapareas[3] ? this.state.mapareas[3].areaColor : "grey"}  area-color = "FFFF00" d = "M123 508 L163 543 L147 562 L105 528 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB3-B5" className = {this.state.mapareas[4] ? this.state.mapareas[4].areaColor : "grey"}  area-color = "00FF00" d = "M31 245 L34 263 L34 284 L86 288 L116 235 L89 219 C89,219 70,239 31,245 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB5-B10" className = {this.state.mapareas[5] ? this.state.mapareas[5].areaColor : "grey"}  area-color = "FFFF00" d = "M116 235 L89 219 L133 164 L156 184 L116 235 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB10-B17" className = {this.state.mapareas[6] ? this.state.mapareas[6].areaColor : "grey"} area-color = "FF0000" d = "M133 164 L156 184 L205 122 L179 104 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conB17-B25" className = {this.state.mapareas[7] ? this.state.mapareas[7].areaColor : "grey"}  area-color = "00FF00" d = "M205 122 L179 104 L223 54 L245 72 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "interTerminal1" className = {this.state.mapareas[8] ? this.state.mapareas[8].areaColor : "grey"}  area-color = "00FF00" d = "M86 288 L93 296 C93,296 67,305 50,320 C50,320 67,356 94,388 C94,388 127,412 165,425 C169,425 182,408 187,392 L192,382 L93,296 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "interTerminal2" className = {this.state.mapareas[9] ? this.state.mapareas[9].areaColor : "grey"}  area-color = "FF0000" d = "M116 235 L181 294 L144,342 L86,288 Z" strokeWidth = "2" stroke = "green"/> }
-                    {/*Extra paths will be turned grey.  */}
-                    <path id = "interTerminal3" className = "grey" area-color = "FFFF00" d = "M181 294 L144 342 L223 411 L228 453 L243 451 C243,451 246,416 271,386 L181,294 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA5-A13" className = "grey" area-color = "FF0000" d = "M271 386 L255 366 L326 306 L344 327 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA13-A17" className = "grey" area-color = "FFFF00" d = "M326 306 L344 327 L384 292 L367 270 Z" strokeWidth = "2" stroke = "green"/>
-                    <path id = "conA17-A25" className = "grey" area-color = "00FF00" d = "M384 292 L367 270 L412 237 L426 256 Z" strokeWidth = "2" stroke = "green"/> }
-                  </svg>
-                  
-                  </div>
-
-                </Stack>
-            </Card>   
-                  </td>
-               </tr>
-
-               <tr>
-                  <td>
+                <td rowSpan="3" className="mapCol">
                   <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
-              style={{
-                margin: "0 13%",
-                padding: "1rem",
-                backgroundColor: "white",
-              }}>
-            <Stack horizontalAlign="left"><b>Average Values</b></Stack>
-            <DetailsList
-                  onRenderRow={this._onRenderRow}
-                  items={this.state.averages}
-                  columns={[
-                    {
-                        key: "column1",
-                        name: "Mask Average",
-                        fieldName: "mavg",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    },
-                    {
-                        key: "column2",
-                        name: "Distancing Average",
-                        fieldName: "davg",
-                        minWidth: 50,
-                        maxWidth: 100,
-                        isResizable: true,
-                    },
-                    {
-                      key: "column3",
-                      name: "People Average",
-                      fieldName: "pavg",
-                      minWidth: 50,
-                      maxWidth: 100,
-                      isResizable: true,
-                    }
-                  ]}
-                  styles={{ root: { height: "100%" } }}
-                  selectionPreservedOnEmptyClick={true}
-                  layoutMode={DetailsListLayoutMode.justified}
-                  enableUpdateAnimations
-                />
-            </Card>
-                  </td>
-               </tr>
+                    style={{
+                      margin: "1% 9.5%",
+                      padding: "1rem",
+                      backgroundColor: "white",
+                    }}>
 
-               <tr>
-                  <td>
-                        <Card tokens = {{width: "80%", maxWidth: 1600, childrenGap: 5}}
-                            style = {{
-                            margin: "0 13%",
-                            padding: "1rem",
-                            backgroundColor: "white"
-                          }}>
+                    <Stack>
+                      {/*placement incorrect or html interfering with code working? */}
+                      <div className="base_wrap">
+                        <img id="terminal" src={Terminal} alt="Indianapolis Airport: Concourse A and B" />
 
-                          <Stack>Terminal Map Key</Stack>
-                          <Stack>
-                           {/*   const CheckboxBasicExample: React.FunctionComponent = () =>{
+                        <svg id="terminalMap" viewBox="0 0 521 665" preserveAspectRatio="xMinYMax">
+                          <path id="arrivalLevel1" className={this.state.mapareas[0] ? this.state.mapareas[0].areaColor : "grey"} area-color="FF0000" d="M58 482 L81 461 L123 508 L105 529 L58 482 Z" strokeWidth="2" stroke="green" />
+                          <path id="arrivalLevel2" className={this.state.mapareas[1] ? this.state.mapareas[1].areaColor : "grey"} area-color="FFFF00" d="M81 461 L112 434 L150 472 L123 508 L81 461 Z" strokeWidth="2" stroke="green" />
+                          <path id="arrivalLevel3" className={this.state.mapareas[2] ? this.state.mapareas[2].areaColor : "grey"} area-color="00FF00" d="M150 472 L123 508 L163 543 L190 512 L187 537 L187 537 L212 528 L227 537 L245 518 L197 473 L165 486 L150 472 Z" strokeWidth="2" stroke="green" />
+                          <path id="arrivalLevel4" className={this.state.mapareas[3] ? this.state.mapareas[3].areaColor : "grey"} area-color="FFFF00" d="M123 508 L163 543 L147 562 L105 528 Z" strokeWidth="2" stroke="green" />
+                          <path id="conB3-B5" className={this.state.mapareas[4] ? this.state.mapareas[4].areaColor : "grey"} area-color="00FF00" d="M31 245 L34 263 L34 284 L86 288 L116 235 L89 219 C89,219 70,239 31,245 Z" strokeWidth="2" stroke="green" />
+                          <path id="conB5-B10" className={this.state.mapareas[5] ? this.state.mapareas[5].areaColor : "grey"} area-color="FFFF00" d="M116 235 L89 219 L133 164 L156 184 L116 235 Z" strokeWidth="2" stroke="green" />
+                          <path id="conB10-B17" className={this.state.mapareas[6] ? this.state.mapareas[6].areaColor : "grey"} area-color="FF0000" d="M133 164 L156 184 L205 122 L179 104 Z" strokeWidth="2" stroke="green" />
+                          <path id="conB17-B25" className={this.state.mapareas[7] ? this.state.mapareas[7].areaColor : "grey"} area-color="00FF00" d="M205 122 L179 104 L223 54 L245 72 Z" strokeWidth="2" stroke="green" />
+                          <path id="interTerminal1" className={this.state.mapareas[8] ? this.state.mapareas[8].areaColor : "grey"} area-color="00FF00" d="M86 288 L93 296 C93,296 67,305 50,320 C50,320 67,356 94,388 C94,388 127,412 165,425 C169,425 182,408 187,392 L192,382 L93,296 Z" strokeWidth="2" stroke="green" />
+                          <path id="interTerminal2" className={this.state.mapareas[9] ? this.state.mapareas[9].areaColor : "grey"} area-color="FF0000" d="M116 235 L181 294 L144,342 L86,288 Z" strokeWidth="2" stroke="green" /> }
+                    {/*Extra paths will be turned grey.  */}
+                          <path id="interTerminal3" className="grey" area-color="FFFF00" d="M181 294 L144 342 L223 411 L228 453 L243 451 C243,451 246,416 271,386 L181,294 Z" strokeWidth="2" stroke="green" />
+                          <path id="conA5-A13" className="grey" area-color="FF0000" d="M271 386 L255 366 L326 306 L344 327 Z" strokeWidth="2" stroke="green" />
+                          <path id="conA13-A17" className="grey" area-color="FFFF00" d="M326 306 L344 327 L384 292 L367 270 Z" strokeWidth="2" stroke="green" />
+                          <path id="conA17-A25" className="grey" area-color="00FF00" d="M384 292 L367 270 L412 237 L426 256 Z" strokeWidth="2" stroke="green" /> }
+                  </svg>
+
+                      </div>
+
+                    </Stack>
+                  </Card>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
+                    style={{
+                      margin: "0 13%",
+                      padding: "1rem",
+                      backgroundColor: "white",
+                    }}>
+                    <Stack horizontalAlign="left"><b>Average Values</b></Stack>
+                    <DetailsList
+                      onRenderRow={this._onRenderRow}
+                      items={this.state.averages}
+                      columns={[
+                        {
+                          key: "column1",
+                          name: "Mask Average",
+                          fieldName: "mavg",
+                          minWidth: 50,
+                          maxWidth: 100,
+                          isResizable: true,
+                        },
+                        {
+                          key: "column2",
+                          name: "Distancing Average",
+                          fieldName: "davg",
+                          minWidth: 50,
+                          maxWidth: 100,
+                          isResizable: true,
+                        },
+                        {
+                          key: "column3",
+                          name: "People Average",
+                          fieldName: "pavg",
+                          minWidth: 50,
+                          maxWidth: 100,
+                          isResizable: true,
+                        }
+                      ]}
+                      styles={{ root: { height: "100%" } }}
+                      selectionPreservedOnEmptyClick={true}
+                      layoutMode={DetailsListLayoutMode.justified}
+                      enableUpdateAnimations
+                    />
+                  </Card>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <Card tokens={{ width: "80%", maxWidth: 1600, childrenGap: 5 }}
+                    style={{
+                      margin: "0 13%",
+                      padding: "1rem",
+                      backgroundColor: "white"
+                    }}>
+
+                    <Stack>Terminal Map Key</Stack>
+                    <Stack>
+                      {/*   const CheckboxBasicExample: React.FunctionComponent = () =>{
                               return(
                                 <table>
                                     <tbody>
@@ -403,55 +442,55 @@ class Home extends Component {
                                   </table>
                               )
                             } */}
-                          </Stack>
-                        </Card>
-                  </td>
-                </tr>
+                    </Stack>
+                  </Card>
+                </td>
+              </tr>
 
-             </tbody>
-           </table>
-          
+            </tbody>
+          </table>
+
         </Fabric>
-          </div>
+      </div>
 
 
-        
 
-       /* <div className = "mainBox">
-          <div className = "row1col1">
-          
-          </div>
-          <div className = "row1col2">
-                  
-          </div>
-          <div className = "row2col1">
-          
-          </div>
-        </div> */
-          
-        
-         /*</div> <div>
-            <br />
-         </div> */
 
-        
-    
+      /* <div className = "mainBox">
+         <div className = "row1col1">
+         
+         </div>
+         <div className = "row1col2">
+                 
+         </div>
+         <div className = "row2col1">
+         
+         </div>
+       </div> */
+
+
+      /*</div> <div>
+         <br />
+      </div> */
+
+
+
     );
   }
 
 
-  _getselected_url = () => {
-    const selectionCount = this._selection.getSelectedCount();
-    switch (selectionCount) {
-      case 0:
-        return 0;
-      default:
-        //this.StartTimer(this._selection.getSelection()[0]);
-        return (
-          this._selection.getSelection()[0].url
-        );
-    }
-  };
+  /*   _getselected_url = () => {
+      const selectionCount = this._selection.getSelectedCount();
+      switch (selectionCount) {
+        case 0:
+          return 0;
+        default:
+          //this.StartTimer(this._selection.getSelection()[0]);
+          return (
+            this._selection.getSelection()[0].url
+          );
+      }
+    }; */
 
   _onRenderRow = (props) => {
     const customStyles = {};
@@ -466,82 +505,78 @@ class Home extends Component {
   };
 
 
-  _mapChange(ev: React.FormEvent<HTMLElement>, isChecked: boolean)
-  {
-    let checkColor = ev.target; 
+  _mapChange(ev: React.FormEvent<HTMLElement>, isChecked: boolean) {
+    let checkColor = ev.target;
     let valColor = checkColor.getAttribute("divAssoc");
-   // console.log(valColor); 
-    let totalMap = document.getElementById("terminalMap").querySelectorAll("path"); 
+    // console.log(valColor); 
+    let totalMap = document.getElementById("terminalMap").querySelectorAll("path");
 
-    for(this.maps in totalMap)
-    {
+    for (this.maps in totalMap) {
       let pathColor = totalMap[this.maps].getAttribute("area-color");
 
-      if (valColor == pathColor)
-      {
-       let  newPathColor = totalMap[this.maps].style.fill.value = valColor;
+      if (valColor == pathColor) {
+        let newPathColor = totalMap[this.maps].style.fill.value = valColor;
       }
-      else
-      {
-        break; 
+      else {
+        break;
       }
     }
-      
 
-   /* _areaScore = (props) =>
-    {
-      if areascore <= 3.33
-      {
-        //fill color would be green
-        className = "green"; 
-      }
-      else if areascore > 3.33 and areascore <= 6.66
-      {
-        //fill color would be yellow
-        className = "yellow"; 
-      }
-      else
-      {
-        //fill color would be red 
-        className = "red"; 
-      }
-    } 
-    
-      /*  if(valColor == "FF0000")
-        {
-            
-        }
 
-        else if(valColor == "FF0000" and valColor == "FFFF00")
-        {
+    /* _areaScore = (props) =>
+     {
+       if areascore <= 3.33
+       {
+         //fill color would be green
+         className = "green"; 
+       }
+       else if areascore > 3.33 and areascore <= 6.66
+       {
+         //fill color would be yellow
+         className = "yellow"; 
+       }
+       else
+       {
+         //fill color would be red 
+         className = "red"; 
+       }
+     } 
+     
+       /*  if(valColor == "FF0000")
+         {
+             
+         }
+ 
+         else if(valColor == "FF0000" and valColor == "FFFF00")
+         {
+ 
+         }
+         else if(valColor == "FF0000" and valColor == "00FF00")
+         {
+ 
+         }
+         else if(valColor == "FFFF00")
+         {
+ 
+         }
+         else if(valColor == "FFFF00"  and valColor == "00FF00")
+         {
+ 
+         }
+         else if(valColor == "00FF00")
+         {
+ 
+         }
+         else if(valColor =="FF0000" and valColor == "FFFF00" and valColor == "00FF00")
+         {
+ 
+         }
+ */
 
-        }
-        else if(valColor == "FF0000" and valColor == "00FF00")
-        {
 
-        }
-        else if(valColor == "FFFF00")
-        {
+  }
 
-        }
-        else if(valColor == "FFFF00"  and valColor == "00FF00")
-        {
 
-        }
-        else if(valColor == "00FF00")
-        {
 
-        }
-        else if(valColor =="FF0000" and valColor == "FFFF00" and valColor == "00FF00")
-        {
-
-        }
-*/
-
-          
-          }
-
-    
-   
 }
 export default Home

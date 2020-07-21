@@ -10,7 +10,7 @@ function App() {
       <BrowserRouter>
         <Switch>
         <Redirect exact from="/" to="/home" />
-        <Route path='/local' component={LocalDisplay} />
+        <Route path='/local/:cid' exact component={LocalDisplay} />
         <Route path='/home' component={Home} />
         </Switch>
         </BrowserRouter>
