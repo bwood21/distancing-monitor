@@ -87,12 +87,12 @@ class LocalDisplay extends Component {
 
   setScores() { //duplicate code, change later
     console.log(this.state.mscore[this.state.seconds])
-    if (this.state.mscore[this.state.seconds] > 5) { //TODO: Change this calculation
+    if (this.state.mscore[this.state.seconds] < (this.state.pscore[this.state.seconds] * .8)) { //80% required for good status
       this.setState({ iswearingmask: false })
     } else {
       this.setState({ iswearingmask: true })
     }
-    if (this.state.dscore[this.state.seconds] > 5) {
+    if (this.state.dscore[this.state.seconds] < (this.state.pscore[this.state.seconds] * .8)) { //80% required for good status
       this.setState({ issocialdistancing: false })
     } else {
       this.setState({ issocialdistancing: true })

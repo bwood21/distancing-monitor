@@ -10,7 +10,6 @@ import {
   Selection,
   SelectionMode
 } from "office-ui-fabric-react/lib/DetailsList";
-import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 import { Fabric } from "office-ui-fabric-react/lib/Fabric";
 import { DetailsRow } from "office-ui-fabric-react/lib/DetailsList";
 import {
@@ -21,7 +20,6 @@ import firebaseConfig from "./Firebase/firebase";
 import { Player } from 'video-react'
 import "../../node_modules/video-react/dist/video-react.css";
 import Terminal from "../Images/indy_terminals.png";
-//TODO: database Auth
 let localmonitorpath = "/local/";
 const timeinterval = 1000 //milliseconds
 const numinterval = 6
@@ -71,7 +69,6 @@ class Home extends Component {
           let dbcam = { camID: snap.key, mscore: snap.val().mscore, dscore: snap.val().dscore, pscore: snap.val().pscore, url: snap.val().url };
           let initialvals = { camID: snap.key, mscore: snap.val().mscore[0], dscore: snap.val().dscore[0], pscore: snap.val().pscore[0], url: snap.val().url };
           let options = { key: snap.key, text: snap.key };
-          let safescore = (snap.val().mscore + snap.val().dscore) / snap.val().pscore; //TODO: change this calculation
           let initialsafescore = (snap.val().mscore[0] + snap.val().dscore[0]) / snap.val().pscore[0];
           let areaColor = this.setMap(initialsafescore)
           let areascore = { camID: snap.key, safescore: initialsafescore, areaColor: areaColor }; //TODO : remove safescore?
@@ -86,22 +83,22 @@ class Home extends Component {
           });
         })
         this.setState({
-          averages: [...this.state.averages, { mavg: mtotal / iter, davg: dtotal / iter, pavg: ptotal / iter }] //TODO : average rounding
+          averages: [...this.state.averages, { mavg: Math.round(mtotal / iter), davg: Math.round(dtotal / iter), pavg: Math.round(ptotal / iter) }]
         })
       })
   }
 
   setMap(safescore) {
     let areaColor = ""
-    if (safescore <= 3.33) {
+    if (safescore <= 1.5) {
       //fill color would be green
-      areaColor = "green";
+      areaColor = "red";
     }
-    else if (safescore > 3.33 && safescore <= 6.66) {
+    else if (safescore > 1.5 && safescore <= 1.8) {
       //fill color would be yellow
       areaColor = "yellow";
     }
-    else if (safescore < 6.66 && safescore <= 10) {
+    else if (safescore < 1.8 && safescore <= 2.1) { //should never be above 2
       //fill color would be red 
       areaColor = "red";
     }
@@ -121,16 +118,17 @@ class Home extends Component {
     item.dscore = camarrays.dscore[this.state.seconds]
     items[camera] = item //put item back
 
-    let mapIndex = this.state.mapareas.findIndex((obj => obj.camID == this.state.camlist[camera].camID));
-
-    let maps = [this.state.mapareas]
+    let mapIndex = this.state.mapareas.findIndex((obj => obj.camID === this.state.camlist[camera].camID));
+    if(mapIndex < 0){
+      alert("Map area not found")
+    }
+    let maps = [...this.state.mapareas]
     let map = { ...maps[mapIndex] }
 
-    let score = (item.mscore + item.dscore) / item.pscore; //TODO: change this calculation
+    let score = (item.mscore + item.dscore) / item.pscore; //Mask usage needs to be 80%, distancing 80% so score needs to be greater than 1.8
     map.safescore = score
     map.areaColor = this.setMap(score)
     maps[mapIndex] = map
-
     let iter = 0;
     let mavg = 0;
     let davg = 0;
@@ -142,7 +140,7 @@ class Home extends Component {
       pavg += element.pscore
     });
     this.setState({
-      averages: [{ mavg: mavg / iter, davg: davg / iter, pavg: pavg / iter }] //TODO : average rounding
+      averages: [{ mavg: Math.round(mavg / iter), davg: Math.round(davg / iter), pavg: Math.round(pavg / iter) }]
     })
     this.setState({ displaylist: items, mapareas: maps }) //replace items
   }
@@ -165,7 +163,6 @@ class Home extends Component {
             let timestamp = snapshot.child(snapshot.node_.children_.root_.key)
             let cameras = timestamp.child(timestamp.node_.children_.root_.key)
             let cam = cameras.child(this.state.currentlyselected)
-            console.log(cam)
             cam.ref.child("Active").set(true)
           })
 
@@ -186,7 +183,6 @@ class Home extends Component {
         let timestamp = snapshot.child(snapshot.node_.children_.root_.key)
         let cameras = timestamp.child(timestamp.node_.children_.root_.key)
         let cam = cameras.child(this.state.currentlyselected)
-        console.log(cam)
         cam.ref.child("Active").set(false)
       })
   }
@@ -262,7 +258,7 @@ class Home extends Component {
                         options={options}
                         onChange={(e, selectedOption) => {
                           localmonitorpath = "/local/" + selectedOption.key
-                          let index = this.state.camlist.findIndex((obj => obj.camID == selectedOption.key));
+                          let index = this.state.camlist.findIndex((obj => obj.camID === selectedOption.key));
                           this.setState({ currentlyselected: selectedOption.key })
                           this.setState({ new_url: this.state.camlist[index].url })
                           this.StartTimer(index)
