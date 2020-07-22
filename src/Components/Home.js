@@ -20,9 +20,10 @@ import firebaseConfig from "./Firebase/firebase";
 import { Player } from 'video-react'
 import "../../node_modules/video-react/dist/video-react.css";
 import Terminal from "../Images/indy_terminals.png";
+import ControlBar from "video-react/lib/components/control-bar/ControlBar";
 let localmonitorpath = "/local/";
-const timeinterval = 1000 //milliseconds
-const numinterval = 6
+const timeinterval = 3000 //milliseconds
+const numinterval = 5
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -117,7 +118,6 @@ class Home extends Component {
     item.pscore = camarrays.pscore[this.state.seconds]
     item.dscore = camarrays.dscore[this.state.seconds]
     items[camera] = item //put item back
-
     let mapIndex = this.state.mapareas.findIndex((obj => obj.camID === this.state.camlist[camera].camID));
     if(mapIndex < 0){
       alert("Map area not found")
@@ -201,7 +201,7 @@ class Home extends Component {
             marginTop: "2rem",
           }}
         >
-          DistanceMonitor {seconds}
+          SentrySight Dashboard
         </Card>
           &nbsp;
         <div>
@@ -215,7 +215,7 @@ class Home extends Component {
             height={500}
             autoPlay={true}
             src={this.state.new_url}
-          />
+          ><ControlBar disableCompletely={true}/></Player>
         </div>
         &nbsp;
 

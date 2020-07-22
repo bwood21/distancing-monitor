@@ -6,8 +6,8 @@ import mask_green from '../Images/mask_green.png'
 import mask_red from '../Images/mask_red.png'
 import firebase, { database } from "firebase"
 import firebaseConfig from "./Firebase/firebase";
-const timeinterval = 1000 //milliseconds
-const numinterval = 6;
+const timeinterval = 3000 //milliseconds
+const numinterval = 5;
 class LocalDisplay extends Component {
   constructor(props) {
     super(props);
@@ -86,7 +86,6 @@ class LocalDisplay extends Component {
   }
 
   setScores() { //duplicate code, change later
-    console.log(this.state.mscore[this.state.seconds])
     if (this.state.mscore[this.state.seconds] < (this.state.pscore[this.state.seconds] * .8)) { //80% required for good status
       this.setState({ iswearingmask: false })
     } else {
