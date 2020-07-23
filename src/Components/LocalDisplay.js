@@ -103,8 +103,8 @@ class LocalDisplay extends Component {
     return (
     <div id = "colors">
       <div className={(issocialdistancing && iswearingmask) ? 'background-green' : ((!issocialdistancing && !iswearingmask) ? 'background-red' : 'background-yellow')}>
-        <h1>Social Distancing : {issocialdistancing ? 'Good' : 'Bad'} </h1>
-        <h1>Mask Wearing : {iswearingmask ? 'Good' : 'Bad'} </h1>
+        <h1>Social Distancing : {issocialdistancing ? 'Good' : 'Warning'} </h1>
+        <h1>Mask Wearing : {iswearingmask ? 'Good' : 'Warning'} </h1>
         <img className={`icons${(visible && !issocialdistancing) ? " transition" : ""}`} src={issocialdistancing ? distancing_green : distancing_red} alt="distancing"></img>
         <img className={`icons${(visible && !iswearingmask) ? " transition" : ""}`} src={iswearingmask ? mask_green : mask_red} alt="distancing"></img>
       </div>
