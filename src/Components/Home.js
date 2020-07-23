@@ -405,6 +405,46 @@ class Home extends Component {
                   </Card>
                 </td>
               </tr>
+              
+              <tr>
+                <td>
+                  <Card tokens = {{width: "90%", maxWidth: 1600, childrenGap: 5}}
+                              style = {{
+                              margin: "0 13%",
+                              padding: "1rem",
+                              backgroundColor: "white"
+                            }}>
+                            <Stack>Terminal Map Key</Stack>
+                            <Stack>
+                                  <table id = "key">
+                                      <tbody>
+                                        <tr>
+                                          <td>
+                                              <td id = "red">&nbsp; &nbsp; &nbsp;</td>
+                                              <td>
+                                                  Severe Risk: 90%+ of people not following protocols
+                                              </td>
+                                          </td>
+                                          <td>
+                                          <td id = "yellow">&nbsp; &nbsp; &nbsp;</td>
+                                              <td>
+                                                  Moderate Risk: 75-90% of people following protocols
+                                              </td>
+                                          </td>
+                                          <td>
+                                              <td id = "green">&nbsp; &nbsp; &nbsp;</td>
+                                              <td>
+                                                  Relative Safety: 75% of people following protocols 
+                                              </td>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                            </Stack>
+                          </Card>
+                </td>
+              </tr>
+              
 
             </tbody>
           </table>
