@@ -335,7 +335,7 @@ class Home extends Component {
                       <div className="base_wrap">
                         <img id="terminal" src={Terminal} alt="Indianapolis Airport: Concourse A and B" />
 
-                        <svg id="terminalMap" viewBox="0 0 521 665" preserveAspectRatio="xMinYMax">
+                        <svg id="terminalMap" viewBox="0 0 430 574" preserveAspectRatio="xMinYMax">
                           <path id="arrivalLevel1" className={this.state.mapareas[0] ? this.state.mapareas[0].areaColor : "grey"} area-color="FF0000" d="M58 482 L81 461 L123 508 L105 529 L58 482 Z" strokeWidth="2" stroke="green" />
                           <path id="arrivalLevel2" className={this.state.mapareas[1] ? this.state.mapareas[1].areaColor : "grey"} area-color="FFFF00" d="M81 461 L112 434 L150 472 L123 508 L81 461 Z" strokeWidth="2" stroke="green" />
                           <path id="arrivalLevel3" className={this.state.mapareas[2] ? this.state.mapareas[2].areaColor : "grey"} area-color="00FF00" d="M150 472 L123 508 L163 543 L190 512 L187 537 L187 537 L212 528 L227 537 L245 518 L197 473 L165 486 L150 472 Z" strokeWidth="2" stroke="green" />
