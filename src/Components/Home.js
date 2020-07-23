@@ -114,9 +114,10 @@ class Home extends Component {
     let items = [...this.state.displaylist]
     let item = { ...items[camera] }
 
-    item.mscore = camarrays.mscore[this.state.seconds] //setting new values
+    item.mscore = parseFloat(((camarrays.mscore[this.state.seconds]) / camarrays.pscore[this.state.seconds]).toFixed(2)+"%"); //setting new values
     item.pscore = camarrays.pscore[this.state.seconds]
-    item.dscore = camarrays.dscore[this.state.seconds]
+    item.dscore = parseFloat(((camarrays.dscore[this.state.seconds]) / camarrays.pscore[this.state.seconds]).toFixed(2)+"%");
+    
     items[camera] = item //put item back
     let mapIndex = this.state.mapareas.findIndex((obj => obj.camID === this.state.camlist[camera].camID));
     if(mapIndex < 0){
@@ -286,7 +287,7 @@ class Home extends Component {
                           },
                           {
                             key: "column2",
-                            name: "Mask Score",
+                            name: "% Masks",
                             fieldName: "mscore",
                             minWidth: 50,
                             maxWidth: 100,
@@ -294,7 +295,7 @@ class Home extends Component {
                           },
                           {
                             key: "column3",
-                            name: "Distancing Score",
+                            name: "% Distancing",
                             fieldName: "dscore",
                             minWidth: 50,
                             maxWidth: 100,
